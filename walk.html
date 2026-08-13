@@ -24,12 +24,21 @@
 .route-actions{display:flex;align-items:center;gap:9px}.kakao-link{display:inline-flex;align-items:center;padding:8px 11px;border:1px solid #52616a;border-radius:99px;color:#fff;text-decoration:none;font-size:10px;font-weight:700}.kakao-link:hover{background:#fee500;color:#191919;border-color:#fee500}.location-grid .full-note{grid-column:1/-1;margin:-2px 0 0;color:var(--muted);font-size:10px}.input-with-action input:not([readonly]){background:#fff}.input-with-action button{min-width:86px}
 .map{z-index:1}
 .kakao-map{position:absolute;inset:0}
+.preference-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.preference-card{border:1px solid var(--line);border-radius:14px;background:var(--paper);padding:14px}
+.preference-card label{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:700}
+.preference-card label output{color:var(--green);font-size:11px}
+.slope-range{width:100%;margin:16px 0 7px;accent-color:var(--green);cursor:pointer}
+.range-labels{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}
+.time-input{display:flex;align-items:center;gap:8px;margin-top:12px}
+.time-input input{width:100%;padding:11px;border:1px solid var(--line);border-radius:9px;background:#fff;font-size:13px}
+.time-input span{white-space:nowrap;font-size:12px;font-weight:700}
 .score-float{z-index:500;pointer-events:none}
 .map-loading{position:absolute;left:50%;bottom:20px;transform:translateX(-50%);z-index:500;background:rgba(255,255,255,.92);padding:9px 13px;border-radius:99px;font-size:10px;font-weight:700;white-space:nowrap;box-shadow:0 4px 18px rgba(20,39,31,.12)}
 .walk-marker{width:32px;height:32px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--ink);border:3px solid white;box-shadow:0 4px 12px rgba(20,39,31,.28)}
 .walk-marker.end{background:var(--green)}
 .walk-marker span{display:block;transform:rotate(45deg);color:#fff;text-align:center;line-height:25px;font-size:10px;font-weight:700}
-@media(max-width:540px){.location-grid{grid-template-columns:1fr}.input-with-action button{padding:0 12px}}
+@media(max-width:540px){.location-grid,.preference-grid{grid-template-columns:1fr}.input-with-action button{padding:0 12px}}
 
 </style>
 </head>
@@ -72,15 +81,28 @@
             <p class="full-note">카카오맵 길찾기로 연결할 수 있도록 장소명 또는 주소를 구체적으로 입력하세요.</p>
           </div>
           <fieldset>
-            <legend>원하는 산책 키워드 <small>여러 개 선택 가능</small></legend>
+            <legend>산책 테마 <small>여러 개 선택 가능</small></legend>
             <div class="chips">
-              <label><input type="checkbox" value="바다" checked><span>🌊 바다</span></label>
-              <label><input type="checkbox" value="공원"><span>🌿 공원</span></label>
-              <label><input type="checkbox" value="야경"><span>🌙 야경</span></label>
-              <label><input type="checkbox" value="조용함"><span>🍃 조용함</span></label>
-              <label><input type="checkbox" value="평탄함"><span>👟 평탄함</span></label>
+              <label><input type="checkbox" value="힐링" checked><span>🌿 힐링</span></label>
+              <label><input type="checkbox" value="관광"><span>📷 관광</span></label>
+              <label><input type="checkbox" value="교육"><span>📚 교육</span></label>
+              <label><input type="checkbox" value="식사"><span>🍽️ 식사</span></label>
+              <label><input type="checkbox" value="운동"><span>🏃 운동</span></label>
+              <label><input type="checkbox" value="바다"><span>🌊 바다</span></label>
             </div>
           </fieldset>
+          <div class="preference-grid">
+            <div class="preference-card">
+              <label for="slope">도로 상태 <output id="slope-output">평탄한 길 선호</output></label>
+              <input class="slope-range" id="slope" type="range" min="0" max="100" value="20" step="5" aria-label="도로 경사 선호도">
+              <div class="range-labels"><span>평탄함</span><span>경사짐</span></div>
+            </div>
+            <div class="preference-card">
+              <label for="target-time">원하는 산책 시간 <output id="time-output">60분</output></label>
+              <div class="time-input"><input id="target-time" type="number" min="10" max="240" step="10" value="60" aria-label="원하는 산책 시간"><span>분</span></div>
+              <div class="range-labels"><span>최소 10분</span><span>최대 240분</span></div>
+            </div>
+          </div>
           <button class="primary" type="submit"><span>공기 좋은 산책로 찾기</span><b>→</b></button>
         </form>
       </div>
@@ -88,34 +110,7 @@
       <aside class="route-board" aria-label="추천 산책로 미리보기">
         <div class="board-top"><div><p class="mono">맑은 산책 지도</p><strong id="board-title">남포동 → 영도</strong></div><div class="route-actions"><a class="kakao-link" id="kakao-route-link" href="https://map.kakao.com/" target="_blank" rel="noopener">카카오맵 길찾기 ↗</a></div></div>
         <div class="map" id="map">
-          <div class="kakao-map" id="map-canvas" aria-label="카카오 산책 경로 지도"></div>
-          <div class="score-float"><small>통합 오염 지수</small><strong id="map-score">43.8</strong><span id="map-grade">좋음</span></div>
-          <div class="map-loading" id="map-loading">상세 지도를 준비하고 있습니다.</div>
-        </div>
-        <div class="legend"><span><i class="safe"></i>추천 산책 경로</span><span><i class="avoid"></i>출발·도착 지점</span><small>상세 지도 · 카카오맵 길찾기 연동</small></div>
-      </aside>
-    </section>
-
-    <section class="result-section" id="result" aria-live="polite">
-      <div class="section-heading"><div><p class="eyebrow">오늘의 산책</p><h2>오늘의 추천 산책로</h2></div><span id="analysis-time"></span></div>
-      <div class="result-layout">
-        <article class="route-card">
-          <div class="rank">가장 좋은 경로 <span id="grade-pill">좋음</span></div>
-          <h3 id="route-name">남항 바람길 코스</h3>
-          <p class="route-path" id="route-path">남포동 → 용두산공원 → 영도대교 → 흰여울문화마을</p>
-          <div class="metrics">
-            <div><small>예상 시간</small><strong id="duration">58분</strong></div>
-            <div><small>산책 거리</small><strong id="distance">4.1km</strong></div>
-            <div><small>통합 지수</small><strong id="score">43.8</strong></div>
-          </div>
-          <div class="reasons" id="reasons"></div>
-          <div class="warning" id="warning" hidden><span>!</span><p><strong>주의해서 걸어주세요</strong>이 경로는 공업 지역과 상업 지역을 지나는 경로이므로, 창문과 환기구를 닫고 큰 차량들에 주의하세요.</p></div>
-        </article>
-        <aside class="formula-card">
-          <p class="mono">공기 점수</p><h3>왜 이 길을 추천했나요?</h3>
-          <div class="calc"><div><small>AIS 선박위치정보</small><strong id="ais">12</strong></div><b>× 1.875</b><div><small>미세먼지 PM10</small><strong id="pm">21</strong></div><b>=</b><div class="total"><small>통합 오염 지수</small><strong id="total">43.5</strong></div></div>
-          <div class="scale" aria-label="오염 지수 범주"><span>좋음</span><span>보통</span><span>주의</span><span>나쁨</span><span>매우 나쁨</span><i id="scale-marker"></i></div>
-          <p class="formula-note">AIS × 1.875 + 미세먼지 농도. 점수가 낮을수록 걷기 좋은 공기입니다.</p>
+          <div class="kakao-map" id="map-canvas" aria-label="카카오 산책 경로 지도"></div>…610 tokens truncated…록 걷기 좋은 공기입니다.</p>
         </aside>
       </div>
     </section>
@@ -140,14 +135,14 @@
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f08d9ce03f34f4619b555a7eec900abc&libraries=services&autoload=false"></script>
   <script>
 const areas = [
-  {id:'nampo',name:'남포동',zone:'중구',lat:35.0975,lng:129.0349,ais:12,pm:21,commercial:58,industrial:4,tags:['바다','야경','평탄함'],spot:'용두산공원'},
-  {id:'yeongdo',name:'영도',zone:'영도구',lat:35.0788,lng:129.0418,ais:9,pm:18,commercial:18,industrial:14,tags:['바다','조용함'],spot:'흰여울문화마을'},
-  {id:'gwangalli',name:'광안리',zone:'수영구',lat:35.1532,lng:129.1187,ais:7,pm:17,commercial:44,industrial:2,tags:['바다','야경','평탄함'],spot:'광안리 해수욕장'},
-  {id:'haeundae',name:'해운대',zone:'해운대구',lat:35.1587,lng:129.1520,ais:6,pm:19,commercial:49,industrial:1,tags:['바다','공원','평탄함'],spot:'동백섬'},
-  {id:'dadaepo',name:'다대포',zone:'사하구',lat:35.0470,lng:128.9668,ais:15,pm:26,commercial:12,industrial:31,tags:['바다','공원','조용함','평탄함'],spot:'다대포 해수욕장'},
-  {id:'bukhang',name:'북항',zone:'동구',lat:35.1162,lng:129.0485,ais:31,pm:35,commercial:36,industrial:49,tags:['바다','야경'],spot:'북항친수공원'},
-  {id:'oncheon',name:'온천천',zone:'동래구',lat:35.1958,lng:129.0798,ais:1,pm:24,commercial:21,industrial:3,tags:['공원','조용함','평탄함'],spot:'온천천 시민공원'},
-  {id:'samrak',name:'삼락생태공원',zone:'사상구',lat:35.1684,lng:128.9731,ais:2,pm:29,commercial:5,industrial:28,tags:['공원','조용함','평탄함'],spot:'삼락생태공원'}
+  {id:'nampo',name:'남포동',zone:'중구',lat:35.0975,lng:129.0349,ais:12,pm:21,commercial:58,industrial:4,tags:['관광','교육','식사'],slope:25,spot:'용두산공원'},
+  {id:'yeongdo',name:'영도',zone:'영도구',lat:35.0788,lng:129.0418,ais:9,pm:18,commercial:18,industrial:14,tags:['힐링','관광','운동','바다'],slope:75,spot:'흰여울문화마을'},
+  {id:'gwangalli',name:'광안리',zone:'수영구',lat:35.1532,lng:129.1187,ais:7,pm:17,commercial:44,industrial:2,tags:['관광','식사','운동','바다'],slope:10,spot:'광안리 해수욕장'},
+  {id:'haeundae',name:'해운대',zone:'해운대구',lat:35.1587,lng:129.1520,ais:6,pm:19,commercial:49,industrial:1,tags:['힐링','관광','식사','운동','바다'],slope:20,spot:'동백섬'},
+  {id:'dadaepo',name:'다대포',zone:'사하구',lat:35.0470,lng:128.9668,ais:15,pm:26,commercial:12,industrial:31,tags:['힐링','운동','바다'],slope:10,spot:'다대포 해수욕장'},
+  {id:'bukhang',name:'북항',zone:'동구',lat:35.1162,lng:129.0485,ais:31,pm:35,commercial:36,industrial:49,tags:['교육','관광','운동','바다'],slope:15,spot:'북항친수공원'},
+  {id:'oncheon',name:'온천천',zone:'동래구',lat:35.1958,lng:129.0798,ais:1,pm:24,commercial:21,industrial:3,tags:['힐링','교육','운동'],slope:5,spot:'온천천 시민공원'},
+  {id:'samrak',name:'삼락생태공원',zone:'사상구',lat:35.1684,lng:128.9731,ais:2,pm:29,commercial:5,industrial:28,tags:['힐링','교육','운동'],slope:5,spot:'삼락생태공원'}
 ];
 
 const startInput=document.querySelector('#start');
@@ -156,6 +151,10 @@ const locateButton=document.querySelector('#locate');
 const locationStatus=document.querySelector('#location-status');
 const mapLoading=document.querySelector('#map-loading');
 const kakaoRouteLink=document.querySelector('#kakao-route-link');
+const slopeInput=document.querySelector('#slope');
+const slopeOutput=document.querySelector('#slope-output');
+const targetTimeInput=document.querySelector('#target-time');
+const timeOutput=document.querySelector('#time-output');
 let currentPoint={lat:areas[0].lat,lng:areas[0].lng,name:'남포동'};
 let usingCurrentLocation=false;
 let walkMap;
@@ -233,18 +232,46 @@ async function reverseCurrentLocation(point){
   return result.road_address?.address_name||result.address?.address_name||'현재 위치';
 }
 
-async function fetchWalkingRoute(from,to){
-  const url=`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson&steps=false`;
+const slopeLabel=value=>value<25?'평탄한 길 선호':value<50?'완만한 길 선호':value<75?'약간 경사진 길':'경사진 길 선호';
+
+function chooseWaypoint(from,to,themes,desiredSlope,targetMinutes){
+  const baseDistance=distanceBetween(from,to);
+  const targetDistance=Math.max(baseDistance,targetMinutes/14);
+  const directArea=nearestArea({lat:(from.lat+to.lat)/2,lng:(from.lng+to.lng)/2});
+  const directMatches=themes.filter(theme=>directArea.tags.includes(theme)).length;
+  const directTime=baseDistance*14;
+  const directScore=directMatches*36+(1-Math.min(Math.abs(directArea.slope-desiredSlope)/100,1))*24+(1-Math.min(Math.abs(directTime-targetMinutes)/Math.max(targetMinutes,1),1))*28;
+  const candidates=areas.map(area=>{
+    const fromDistance=distanceBetween(from,area);
+    const toDistance=distanceBetween(area,to);
+    const viaDistance=fromDistance+toDistance;
+    const estimatedMinutes=viaDistance*14;
+    const matches=themes.filter(theme=>area.tags.includes(theme));
+    const slopeFit=1-Math.min(Math.abs(area.slope-desiredSlope)/100,1);
+    const timeFit=1-Math.min(Math.abs(estimatedMinutes-targetMinutes)/Math.max(targetMinutes,1),1);
+    const airBonus=Math.max(0,60-scoreOf(area))/6;
+    const detourPenalty=Math.max(0,viaDistance-targetDistance)*3;
+    return {area,viaDistance,estimatedMinutes,matches,score:matches.length*36+slopeFit*24+timeFit*28+airBonus-detourPenalty,fromDistance,toDistance};
+  }).filter(item=>item.fromDistance>.3&&item.toDistance>.3&&item.viaDistance<=Math.max(baseDistance*2.4,targetDistance*1.45)+.5).sort((a,b)=>b.score-a.score);
+  const best=candidates[0];
+  if(!best||best.score<directScore+5)return null;
+  return best;
+}
+
+async function fetchWalkingRoute(from,to,via=null){
+  const stops=[from,via,to].filter(Boolean).map(point=>`${point.lng},${point.lat}`).join(';');
+  const url=`https://routing.openstreetmap.de/routed-foot/route/v1/driving/${stops}?overview=full&geometries=geojson&steps=false`;
   const response=await fetch(url);
   if(!response.ok)throw new Error('보행 경로 검색 실패');
   const data=await response.json();
   if(!data.routes?.length)throw new Error('보행 경로 없음');
-  return {points:data.routes[0].geometry.coordinates.map(([lng,lat])=>[lat,lng]),distance:data.routes[0].distance/1000,duration:data.routes[0].duration/60,isFallback:false};
+  return {points:data.routes[0].geometry.coordinates.map(([lng,lat])=>[lat,lng]),distance:data.routes[0].distance/1000,duration:data.routes[0].duration/60,isFallback:false,via};
 }
 
-function fallbackRoute(from,to){
-  const distance=distanceBetween(from,to)*1.25;
-  return {points:[[from.lat,from.lng],[to.lat,to.lng]],distance,duration:distance*14,isFallback:true};
+function fallbackRoute(from,to,via=null){
+  const stops=[from,via,to].filter(Boolean);
+  const distance=stops.slice(1).reduce((sum,point,index)=>sum+distanceBetween(stops[index],point),0)*1.25;
+  return {points:stops.map(point=>[point.lat,point.lng]),distance,duration:distance*14,isFallback:true,via};
 }
 
 function drawRoute(from,to,route){
@@ -256,6 +283,7 @@ function drawRoute(from,to,route){
     new kakao.maps.Marker({map:walkMap,position:new kakao.maps.LatLng(from.lat,from.lng),title:`출발지: ${from.name}`}),
     new kakao.maps.Marker({map:walkMap,position:new kakao.maps.LatLng(to.lat,to.lng),title:`도착지: ${to.name}`})
   ];
+  if(route.via)pointLayers.push(new kakao.maps.Marker({map:walkMap,position:new kakao.maps.LatLng(route.via.lat,route.via.lng),title:`추천 경유지: ${route.via.name}`}));
   const bounds=new kakao.maps.LatLngBounds();
   path.forEach(position=>bounds.extend(position));
   walkMap.setBounds(bounds,55,55,55,55);
@@ -281,26 +309,35 @@ async function updateRoute(event,shouldScroll=true){
   try{
     const startPoint=usingCurrentLocation?currentPoint:await findPlace(startText);
     const destination=await findPlace(destinationText);
+    const selected=[...document.querySelectorAll('.chips input:checked')].map(input=>input.value);
+    const desiredSlope=Number(slopeInput.value);
+    const targetMinutes=Math.min(240,Math.max(10,Number(targetTimeInput.value)||60));
+    targetTimeInput.value=targetMinutes;timeOutput.textContent=`${targetMinutes}분`;
+    const waypointChoice=chooseWaypoint(startPoint,destination,selected,desiredSlope,targetMinutes);
+    const via=waypointChoice?{lat:waypointChoice.area.lat,lng:waypointChoice.area.lng,name:waypointChoice.area.spot,area:waypointChoice.area}:null;
     let route;
-    try{route=await fetchWalkingRoute(startPoint,destination);}catch{route=fallbackRoute(startPoint,destination);}
+    try{route=await fetchWalkingRoute(startPoint,destination,via);}catch{route=fallbackRoute(startPoint,destination,via);}
     drawRoute(startPoint,destination,route);
     currentPoint=startPoint;
     if(!usingCurrentLocation)locationStatus.textContent=`출발지 확인: ${startPoint.displayName||startPoint.name}`;
     const startArea=startPoint.area||nearestArea(startPoint),destinationArea=destination.area||nearestArea(destination);
-    const ais=Math.round((startArea.ais+destinationArea.ais)/2);
-    const pm=Math.round((startArea.pm+destinationArea.pm)/2);
+    const routeAreas=[startArea,destinationArea,...(waypointChoice?[waypointChoice.area]:[])];
+    const ais=Math.round(routeAreas.reduce((sum,area)=>sum+area.ais,0)/routeAreas.length);
+    const pm=Math.round(routeAreas.reduce((sum,area)=>sum+area.pm,0)/routeAreas.length);
     const score=+(ais*1.875+pm).toFixed(1),grade=classify(score);
-    const selected=[...document.querySelectorAll('.chips input:checked')].map(input=>input.value);
-    const shared=[...new Set([...startArea.tags,...destinationArea.tags])];
+    const shared=[...new Set(routeAreas.flatMap(area=>area.tags))];
     const matched=selected.filter(tag=>shared.includes(tag));
-    const risky=(startArea.commercial+startArea.industrial+destinationArea.commercial+destinationArea.industrial)/2>58;
-    const routeName=matched.includes('바다')?'바닷바람 산책 코스':matched.includes('공원')?'초록 쉼표 산책 코스':matched.includes('야경')?'별빛 산책 코스':'맑은 공기 산책 코스';
+    const risky=routeAreas.reduce((sum,area)=>sum+area.commercial+area.industrial,0)/routeAreas.length>58;
+    const themeNames={힐링:'초록 쉼표 힐링 코스',관광:'부산 명소 관광 코스',교육:'배움이 있는 산책 코스',식사:'맛따라 걷는 산책 코스',운동:'활력 충전 운동 코스',바다:'바닷바람 산책 코스'};
+    const routeName=themeNames[matched[0]||selected[0]]||'맑은 공기 맞춤 산책 코스';
+    const routePath=[startPoint.name,...(via?[via.name]:[]),destination.name].join(' → ');
     document.querySelector('#board-title').textContent=`${startPoint.name} → ${destination.name}`;
     document.querySelector('#route-name').textContent=routeName;
-    document.querySelector('#route-path').textContent=`${startPoint.name} → ${destination.name}`;
+    document.querySelector('#route-path').textContent=routePath;
     const kakaoFrom=`${encodeURIComponent(startPoint.name)},${startPoint.lat},${startPoint.lng}`;
     const kakaoTo=`${encodeURIComponent(destination.name)},${destination.lat},${destination.lng}`;
-    kakaoRouteLink.href=`https://map.kakao.com/link/from/${kakaoFrom}/to/${kakaoTo}`;
+    const kakaoVia=via?`${encodeURIComponent(via.name)},${via.lat},${via.lng}`:'';
+    kakaoRouteLink.href=via?`https://map.kakao.com/link/by/walk/${kakaoFrom}/${kakaoVia}/${kakaoTo}`:`https://map.kakao.com/link/by/walk/${kakaoFrom}/${kakaoTo}`;
     document.querySelector('#duration').textContent=`${Math.max(1,Math.round(route.duration))}분`;
     document.querySelector('#distance').textContent=`${route.distance.toFixed(1)}km`;
     ['#score','#total','#map-score'].forEach(id=>document.querySelector(id).textContent=score);
@@ -310,7 +347,10 @@ async function updateRoute(event,shouldScroll=true){
     document.querySelector('#scale-marker').style.left=`${Math.min(score/340*100,98)}%`;
     document.querySelector('#warning').hidden=!risky;
     const reasons=document.querySelector('#reasons');reasons.innerHTML='';
-    [`✓ ${grade} 단계의 공기`,risky?'△ 용도지역 우회가 어려운 구간':'✓ 상업·공업지역을 가급적 회피',matched.length?`✓ ${matched.join(' · ')} 취향 반영`:'✓ 낮은 오염 지수 우선',route.isFallback?'△ 직선 경로로 임시 표시':'✓ 실제 보행로 기준 지도'].forEach(text=>{const span=document.createElement('span');span.textContent=text;reasons.append(span);});
+    const actualSlope=Math.round(routeAreas.reduce((sum,area)=>sum+area.slope,0)/routeAreas.length);
+    const timeGap=Math.round(route.duration-targetMinutes);
+    const timeReason=Math.abs(timeGap)<=10?`✓ 원하는 ${targetMinutes}분에 가까운 코스`:timeGap>0?`△ 목표보다 약 ${timeGap}분 긴 코스`:`△ 목표보다 약 ${Math.abs(timeGap)}분 짧은 코스`;
+    [`✓ ${grade} 단계의 공기`,risky?'△ 용도지역 우회가 어려운 구간':'✓ 상업·공업지역을 가급적 회피',matched.length?`✓ ${matched.join(' · ')} 테마 반영`:'✓ 공기 점수를 우선 반영',`✓ ${slopeLabel(actualSlope)} 반영`,timeReason,via?`✓ ${via.name} 경유 추천`:(route.isFallback?'△ 직선 경로로 임시 표시':'✓ 실제 보행로 기준 지도')].forEach(text=>{const span=document.createElement('span');span.textContent=text;reasons.append(span);});
     mapLoading.hidden=true;
     if(shouldScroll)document.querySelector('#result').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(error){
@@ -351,6 +391,8 @@ renderAreaCards();
 document.querySelector('#planner').addEventListener('submit',updateRoute);
 locateButton.addEventListener('click',useCurrentLocation);
 startInput.addEventListener('input',()=>{usingCurrentLocation=false;locateButton.textContent='◎ 현재 위치';locationStatus.textContent='입력한 장소를 출발지로 사용합니다.';});
+slopeInput.addEventListener('input',()=>{slopeOutput.textContent=slopeLabel(Number(slopeInput.value));});
+targetTimeInput.addEventListener('input',()=>{timeOutput.textContent=`${targetTimeInput.value||0}분`;});
 document.querySelector('#analysis-time').textContent=`${new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})} 분석 · 예시 데이터`;
 updateRoute(null,false);
 
