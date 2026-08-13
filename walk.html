@@ -48,6 +48,9 @@
 @media(max-width:540px){.location-grid,.preference-grid{grid-template-columns:1fr}.input-with-action button{padding:0 12px}.route-mode-tabs button{font-size:11px;padding:11px 6px}}
 
 </style>
+<style>
+.area-card .top b.good{background:var(--good);color:#0f2018}.area-card .top b.normal{background:var(--normal);color:#453a10}.area-card .top b.caution{background:var(--caution);color:#fff}.area-card .top b.bad{background:var(--bad);color:#fff}.history-btn{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);margin-top:10px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px;cursor:pointer}.history-btn:hover{background:#fff;border-color:var(--green)}.history-btn .count{font:700 11px "Space Mono";color:var(--green);background:#dcefe2;padding:3px 9px;border-radius:99px}.history-overlay{position:fixed;inset:0;background:rgba(20,39,31,.55);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:24px}.history-overlay.open{display:flex}.history-modal{background:var(--paper);border-radius:24px;width:100%;max-width:540px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(23,41,52,.35);overflow:hidden}.history-modal-head{display:flex;align-items:center;justify-content:space-between;padding:24px 26px 18px;border-bottom:1px solid var(--line)}.history-modal-head p{margin:0}.history-modal-head h3{font-size:22px;margin:6px 0 0}.history-close{width:36px;height:36px;border:1px solid var(--line);background:var(--paper);border-radius:50%;cursor:pointer;font-size:16px}.history-body{padding:16px 22px 22px;overflow-y:auto}.history-empty{text-align:center;color:var(--muted);font-size:13px;padding:44px 20px;line-height:1.8}.history-item{border:1px solid var(--line);border-radius:16px;padding:17px 18px;margin-bottom:12px;background:rgba(255,255,255,.6)}.history-item p{margin:5px 0 0}.history-item small{color:var(--muted)}.history-foot{display:flex;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line)}.history-clear{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:10px;padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer}
+</style>
 </head>
 <body>
   <header class="site-header" id="top">
@@ -118,6 +121,7 @@
             </div>
           </div>
           <button class="primary" type="submit"><span id="submit-label">맞춤 한바퀴 추천받기</span><b>→</b></button>
+          <button class="history-btn" type="button" id="history-open">📋 이전 산책 기록 보기 <span class="count" id="history-count">0</span></button>
         </form>
       </div>
 
@@ -394,7 +398,7 @@ function setPlannerMode(mode,refresh=true){
   if(refresh)updateRoute(null,false);
 }
 
-async function updateRoute(event,shouldScroll=true){
+async function updateRoute(event,shouldScroll=true,shouldRecord=false){
   if(event)event.preventDefault();
   const selected=[...document.querySelectorAll('.chips input:checked')].map(input=>input.value);
   mapLoading.hidden=false;
@@ -479,6 +483,7 @@ async function updateRoute(event,shouldScroll=true){
     const reasons=document.querySelector('#reasons');
     reasons.innerHTML='';
     [`✓ ${grade} 단계의 공기`,risky?'△ 용도지역 우회가 어려운 구간':'✓ 상업·공업지역을 가급적 회피',...extraReasons].forEach(text=>{const span=document.createElement('span');span.textContent=text;reasons.append(span);});
+    if(shouldRecord)saveWalkRecord({name:routeName,path:routePath,distance:`${route.distance.toFixed(1)}km`,duration:`${Math.max(1,Math.round(route.duration))}분`,score,grade});
     mapLoading.hidden=true;
     if(shouldScroll)document.querySelector('#result').scrollIntoView({behavior:'smooth',block:'start'});
   }catch(error){
@@ -516,7 +521,7 @@ function useCurrentLocation(){
 
 initializeMap();
 renderAreaCards();
-document.querySelector('#planner').addEventListener('submit',updateRoute);
+document.querySelector('#planner').addEventListener('submit',event=>updateRoute(event,true,true));
 loopTab.addEventListener('click',()=>setPlannerMode('loop'));
 pointTab.addEventListener('click',()=>setPlannerMode('point'));
 locateButton.addEventListener('click',useCurrentLocation);
@@ -527,6 +532,10 @@ document.querySelector('#analysis-time').textContent=`${new Date().toLocaleTimeS
 setPlannerMode('loop',false);
 updateRoute(null,false);
 
+ </script>
+<div class="history-overlay" id="history-overlay" role="dialog" aria-modal="true" aria-labelledby="history-heading"><div class="history-modal"><div class="history-modal-head"><div><p class="mono">나의 산책 발자취</p><h3 id="history-heading">이전 산책 기록</h3></div><button class="history-close" type="button" id="history-close" aria-label="닫기">✕</button></div><div class="history-body" id="history-body"></div><div class="history-foot"><button class="history-clear" type="button" id="history-clear">전체 기록 지우기</button></div></div></div>
+<script>
+(()=>{const key='baram-walk-history',overlay=document.querySelector('#history-overlay'),body=document.querySelector('#history-body'),count=document.querySelector('#history-count'),foot=document.querySelector('.history-foot');const load=()=>{try{return JSON.parse(localStorage.getItem(key))||[]}catch{return[]}};const refresh=()=>{const records=load();count.textContent=records.length;body.innerHTML=records.length?records.map(r=>`<article class="history-item"><small>${r.date}</small><p><strong>${r.name}</strong></p><p>${r.path}</p><p><small>${r.distance} · ${r.duration} · 점수 ${r.score} (${r.grade})</small></p></article>`).join(''):'<div class="history-empty">아직 저장된 산책 기록이 없어요.<br>산책로를 추천받으면 이곳에 자동으로 기록됩니다.</div>';foot.style.display=records.length?'flex':'none'};window.saveWalkRecord=r=>{const records=load(),last=records[0];if(last&&last.name===r.name&&last.path===r.path&&last.distance===r.distance)return;records.unshift({...r,date:new Date().toLocaleString('ko-KR')});localStorage.setItem(key,JSON.stringify(records.slice(0,50)));refresh()};document.querySelector('#history-open').addEventListener('click',()=>{refresh();overlay.classList.add('open')});document.querySelector('#history-close').addEventListener('click',()=>overlay.classList.remove('open'));overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open')});document.querySelector('#history-clear').addEventListener('click',()=>{localStorage.removeItem(key);refresh()});refresh()})();
 </script>
 </body>
 </html>
