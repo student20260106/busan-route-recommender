@@ -51,12 +51,15 @@
 <style>
 .area-card .top b.good{background:var(--good);color:#0f2018}.area-card .top b.normal{background:var(--normal);color:#453a10}.area-card .top b.caution{background:var(--caution);color:#fff}.area-card .top b.bad{background:var(--bad);color:#fff}.history-btn{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);margin-top:10px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:13px;cursor:pointer}.history-btn:hover{background:#fff;border-color:var(--green)}.history-btn .count{font:700 11px "Space Mono";color:var(--green);background:#dcefe2;padding:3px 9px;border-radius:99px}.history-overlay{position:fixed;inset:0;background:rgba(20,39,31,.55);backdrop-filter:blur(4px);z-index:60;display:none;align-items:center;justify-content:center;padding:24px}.history-overlay.open{display:flex}.history-modal{background:var(--paper);border-radius:24px;width:100%;max-width:540px;max-height:82vh;display:flex;flex-direction:column;box-shadow:0 30px 80px rgba(23,41,52,.35);overflow:hidden}.history-modal-head{display:flex;align-items:center;justify-content:space-between;padding:24px 26px 18px;border-bottom:1px solid var(--line)}.history-modal-head p{margin:0}.history-modal-head h3{font-size:22px;margin:6px 0 0}.history-close{width:36px;height:36px;border:1px solid var(--line);background:var(--paper);border-radius:50%;cursor:pointer;font-size:16px}.history-body{padding:16px 22px 22px;overflow-y:auto}.history-empty{text-align:center;color:var(--muted);font-size:13px;padding:44px 20px;line-height:1.8}.history-item{border:1px solid var(--line);border-radius:16px;padding:17px 18px;margin-bottom:12px;background:rgba(255,255,255,.6)}.history-item p{margin:5px 0 0}.history-item small{color:var(--muted)}.history-foot{display:flex;justify-content:flex-end;padding:14px 22px;border-top:1px solid var(--line)}.history-clear{border:1px solid var(--line);background:var(--paper);color:var(--muted);border-radius:10px;padding:9px 15px;font-size:12px;font-weight:700;cursor:pointer}
 </style>
+<style>
+body{background:radial-gradient(circle at 85% 5%,rgba(113,203,213,.42),transparent 26%),radial-gradient(circle at 10% 40%,rgba(17,102,139,.15),transparent 34%),linear-gradient(135deg,#e7f4f5,#f8f4e8 52%,#e5f1ef)}.site-header{background:rgba(234,244,244,.9)}.brand-mark{width:48px;height:48px;border-radius:50%;object-fit:cover;display:block;box-shadow:0 3px 12px rgba(12,53,82,.18)}.brand small{font-weight:700}.hero{position:relative}.hero:before{content:"";position:absolute;z-index:-1;width:430px;height:430px;right:-150px;top:-100px;border-radius:50%;background:repeating-radial-gradient(ellipse at center,transparent 0 17px,rgba(35,131,158,.11) 18px 21px)}.result-section{background:rgba(215,235,235,.72)}.status-section{background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(212,237,238,.54))}
+</style>
 </head>
 <body>
   <header class="site-header" id="top">
     <a class="brand" href="index.html" aria-label="코스 선택 화면으로 돌아가기">
-      <span class="brand-mark">BG</span>
-      <span><strong>바람길</strong><small>부산 산책로 추천</small></span>
+      <img class="brand-mark" src="assets/wave-way-logo.jpg" alt="WAVE:WAY 로고">
+      <span><strong>WAVE:WAY</strong><small>BUSAN WALK GUIDE</small></span>
     </a>
     <nav aria-label="페이지 바로가기">
       <a href="index.html">코스 선택</a><a href="#planner">산책로 찾기</a><a href="#status">공기 현황</a><a href="#method">추천 원리</a>
@@ -176,7 +179,7 @@
     </section>
   </main>
 
-  <footer><div class="brand"><span class="brand-mark">BG</span><span><strong>바람길</strong><small>부산 공기맞춤 산책로</small></span></div><p>본 웹앱의 수치는 학습용 예시이며, 실제 외출 전 에어코리아의 최신 측정값과 현장 상황을 확인하세요.</p><a href="#top">맨 위로 ↑</a></footer>
+  <footer><div class="brand"><img class="brand-mark" src="assets/wave-way-logo.jpg" alt="WAVE:WAY 로고"><span><strong>WAVE:WAY</strong><small>BUSAN WALK GUIDE</small></span></div><p>본 웹앱의 수치는 학습용 예시이며, 실제 외출 전 에어코리아의 최신 측정값과 현장 상황을 확인하세요.</p><a href="#top">맨 위로 ↑</a></footer>
   <script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=f08d9ce03f34f4619b555a7eec900abc&libraries=services&autoload=false"></script>
   <script>
 const areas = [
