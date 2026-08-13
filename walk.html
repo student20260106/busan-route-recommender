@@ -110,7 +110,34 @@
       <aside class="route-board" aria-label="추천 산책로 미리보기">
         <div class="board-top"><div><p class="mono">맑은 산책 지도</p><strong id="board-title">남포동 → 영도</strong></div><div class="route-actions"><a class="kakao-link" id="kakao-route-link" href="https://map.kakao.com/" target="_blank" rel="noopener">카카오맵 길찾기 ↗</a></div></div>
         <div class="map" id="map">
-          <div class="kakao-map" id="map-canvas" aria-label="카카오 산책 경로 지도"></div>…610 tokens truncated…록 걷기 좋은 공기입니다.</p>
+          <div class="kakao-map" id="map-canvas" aria-label="카카오 산책 경로 지도"></div>
+          <div class="score-float"><small>통합 오염 지수</small><strong id="map-score">43.8</strong><span id="map-grade">좋음</span></div>
+          <div class="map-loading" id="map-loading">상세 지도를 준비하고 있습니다.</div>
+        </div>
+        <div class="legend"><span><i class="safe"></i>추천 산책 경로</span><span><i class="avoid"></i>출발·도착 지점</span><small>상세 지도 · 카카오맵 길찾기 연동</small></div>
+      </aside>
+    </section>
+
+    <section class="result-section" id="result" aria-live="polite">
+      <div class="section-heading"><div><p class="eyebrow">오늘의 산책</p><h2>오늘의 추천 산책로</h2></div><span id="analysis-time"></span></div>
+      <div class="result-layout">
+        <article class="route-card">
+          <div class="rank">가장 좋은 경로 <span id="grade-pill">좋음</span></div>
+          <h3 id="route-name">남항 바람길 코스</h3>
+          <p class="route-path" id="route-path">남포동 → 용두산공원 → 영도대교 → 흰여울문화마을</p>
+          <div class="metrics">
+            <div><small>예상 시간</small><strong id="duration">58분</strong></div>
+            <div><small>산책 거리</small><strong id="distance">4.1km</strong></div>
+            <div><small>통합 지수</small><strong id="score">43.8</strong></div>
+          </div>
+          <div class="reasons" id="reasons"></div>
+          <div class="warning" id="warning" hidden><span>!</span><p><strong>주의해서 걸어주세요</strong>이 경로는 공업 지역과 상업 지역을 지나는 경로이므로, 창문과 환기구를 닫고 큰 차량들에 주의하세요.</p></div>
+        </article>
+        <aside class="formula-card">
+          <p class="mono">공기 점수</p><h3>왜 이 길을 추천했나요?</h3>
+          <div class="calc"><div><small>AIS 선박위치정보</small><strong id="ais">12</strong></div><b>× 1.875</b><div><small>미세먼지 PM10</small><strong id="pm">21</strong></div><b>=</b><div class="total"><small>통합 오염 지수</small><strong id="total">43.5</strong></div></div>
+          <div class="scale" aria-label="오염 지수 범주"><span>좋음</span><span>보통</span><span>주의</span><span>나쁨</span><span>매우 나쁨</span><i id="scale-marker"></i></div>
+          <p class="formula-note">AIS × 1.875 + 미세먼지 농도. 점수가 낮을수록 걷기 좋은 공기입니다.</p>
         </aside>
       </div>
     </section>
@@ -399,4 +426,3 @@ updateRoute(null,false);
 </script>
 </body>
 </html>
-
