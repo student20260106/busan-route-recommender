@@ -64,7 +64,7 @@
         <form class="planner" id="planner">
           <div class="planner-head">
             <div><p class="mono">산책로 찾기</p><h2>어디서 어디까지 걸을까요?</h2></div>
-            <span>예상 소요 30–90분</span>
+            <span>희망 시간 10–240분</span>
           </div>
           <div class="location-grid">
             <label>출발지 직접 입력
@@ -153,7 +153,7 @@
         <li><b>01</b><div><h3>해양구역 AIS 확인</h3><p>출발·도착지 주변 선박위치정보 값을 불러옵니다.</p></div></li>
         <li><b>02</b><div><h3>미세먼지 결합</h3><p>AIS × 1.875 + PM10으로 통합 지수를 계산합니다.</p></div></li>
         <li><b>03</b><div><h3>용도지역 확인</h3><p>상업·공업지역을 우선 제외하고 예외 상황은 표시합니다.</p></div></li>
-        <li><b>04</b><div><h3>취향으로 최종 추천</h3><p>바다·공원·야경 등 선택 키워드를 경유지에 반영합니다.</p></div></li>
+        <li><b>04</b><div><h3>테마·경사·시간 맞춤 추천</h3><p>힐링·관광 등 선택 테마와 도로 경사, 원하는 산책 시간을 경유지와 경로에 반영합니다.</p></div></li>
       </ol>
     </section>
   </main>
@@ -340,10 +340,21 @@ async function updateRoute(event,shouldScroll=true){
     const desiredSlope=Number(slopeInput.value);
     const targetMinutes=Math.min(240,Math.max(10,Number(targetTimeInput.value)||60));
     targetTimeInput.value=targetMinutes;timeOutput.textContent=`${targetMinutes}분`;
-    const waypointChoice=chooseWaypoint(startPoint,destination,selected,desiredSlope,targetMinutes);
-    const via=waypointChoice?{lat:waypointChoice.area.lat,lng:waypointChoice.area.lng,name:waypointChoice.area.spot,area:waypointChoice.area}:null;
+    let waypointChoice=chooseWaypoint(startPoint,destination,selected,desiredSlope,targetMinutes);
+    let via=waypointChoice?{lat:waypointChoice.area.lat,lng:waypointChoice.area.lng,name:waypointChoice.area.spot,area:waypointChoice.area}:null;
     let route;
-    try{route=await fetchWalkingRoute(startPoint,destination,via);}catch{route=fallbackRoute(startPoint,destination,via);}
+    try{
+      const directRoute=await fetchWalkingRoute(startPoint,destination);
+      if(via){
+        try{
+          const themedRoute=await fetchWalkingRoute(startPoint,destination,via);
+          const directGap=Math.abs(directRoute.duration-targetMinutes);
+          const themedGap=Math.abs(themedRoute.duration-targetMinutes);
+          route=themedGap<=directGap+15?themedRoute:directRoute;
+          if(route===directRoute){waypointChoice=null;via=null;}
+        }catch{route=directRoute;waypointChoice=null;via=null;}
+      }else route=directRoute;
+    }catch{route=fallbackRoute(startPoint,destination,via);}
     drawRoute(startPoint,destination,route);
     currentPoint=startPoint;
     if(!usingCurrentLocation)locationStatus.textContent=`출발지 확인: ${startPoint.displayName||startPoint.name}`;
